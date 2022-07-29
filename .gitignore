@@ -1,0 +1,6 @@
+node_modules
+.env
+views/content
+db.json
+enc.keys
+restbackup.txt
