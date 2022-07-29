@@ -44,9 +44,9 @@ app.get('/login', checkNotAuthenticated, (req, res) => {
   res.render('login.ejs')
 })
 
-// app.get('/register', checkNotAuthenticated, (req, res) => {
-//   res.render('register.ejs')
-// })
+app.get('/register', checkNotAuthenticated, (req, res) => {
+  res.render('register.ejs')
+})
 
 app.get('/confirm', checkAuthenticated, (req, res) => {
   // find array based on username
@@ -77,26 +77,26 @@ app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
   failureFlash: true
 }))
 
-// app.post('/register', checkNotAuthenticated, async (req, res) => {
-//   try {
-//     // Hash the password
-//     const hashedPassword = await bcrypt.hash(req.body.password, 10)
-//     // Make an object to push the user information
-//     register = {
-//       id: Date.now().toString(),
-//       username: req.body.username,
-//       password: hashedPassword
-//     }
-//     // Push the registration info to db
-//     users.users.push(register)
-//     // Add indentations to make the db readable
-//     fs.writeFileSync(userspath, JSON.stringify(users, null, 4));
-//     res.redirect('/login')
-//   } catch (e) {
-//     console.log(e)
-//     res.redirect('/register')
-//   }
-// })
+app.post('/register', checkNotAuthenticated, async (req, res) => {
+  try {
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    // Make an object to push the user information
+    register = {
+      id: Date.now().toString(),
+      username: req.body.username,
+      password: hashedPassword
+    }
+    // Push the registration info to db
+    users.users.push(register)
+    // Add indentations to make the db readable
+    fs.writeFileSync(userspath, JSON.stringify(users, null, 4));
+    res.redirect('/login')
+  } catch (e) {
+    console.log(e)
+    res.redirect('/register')
+  }
+})
 
 app.post('/', checkAuthenticated, (req, res) => {
   if (req.files) {
