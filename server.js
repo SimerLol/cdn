@@ -11,7 +11,7 @@ const upload = require('express-fileupload')
 const methodOverride = require('method-override')
 
 // Passport Initialize
-const initializePassport = require('./passport-config')
+const initializePassport = require('./passport-config');
 initializePassport(
   passport,
   username => users.users.find(user => user.username === username),
@@ -37,27 +37,7 @@ app.use(upload());
 
 //--------------------------------------GETS--------------------------------------//
 app.get('/', checkAuthenticated, (req, res) => {
-  res.render('index.ejs', { name: req.user.username})
-})
-
-app.get('/bucket', checkAuthenticated, (req, res) => {
-  const directoryPath = path.join(__dirname + '/views/content/', req.user.username);
-  const filenames = fs.readdirSync(directoryPath);
-
-  const files = filenames.filter((filename) => {
-    // Use fs.lstatSync() to check if the given path is a file.
-    return fs.lstatSync(`${directoryPath}/${filename}`).isFile();
-  });
-
-  const indexedFiles = files.map((file, index) => ({
-    name: file,
-    index: index + 1,
-    type: file.split(".")[1],
-    size: fs.statSync(directoryPath+"/"+file).size/(1024*1024),
-    src: "https://cdn.simer.ml/content/"+ req.user.username + "/" + file
-  }));
-
-  res.render('bucket.ejs', { name: req.user.username, indexedFiles })
+  res.render('index.ejs', { name: req.user.username })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -68,9 +48,37 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
   res.render('register.ejs')
 })
 
+app.get('/bucket', checkAuthenticated, (req, res) => {
+  const username = req.user.username;
+  const masterPath = path.join(__dirname, '/views/content/', username);
+  const fileItems = []; // Create an empty array to store file information
+
+  function getDirectoryContents(dirPath, fileItems) {
+    const items = fs.readdirSync(dirPath);
+    for (let i = 0; i < items.length; i++) {
+      const itemPath = path.join(dirPath, items[i]);
+      const stats = fs.statSync(itemPath);
+      if (stats.isFile()) {
+        fileItems.push({
+          name: itemPath.split("content/" + username)[1],
+          type: items[i].split(".")[1],
+          size: stats.size / (1024 * 1024),
+          index: i,
+          src: "https://cdn.simer.ml/content/" + itemPath.split("/views/content/")[1]
+        });
+      } else if (stats.isDirectory()) {
+        getDirectoryContents(itemPath, fileItems);
+      }
+    }
+  }
+
+  getDirectoryContents(masterPath, fileItems);
+  res.render('bucket.ejs', { name: username, indexedFiles: fileItems });
+});
+
 app.get('/remove', checkAuthenticated, (req, res) => {
   const fileName = req.query.id;
-  const filePath = path.join(__dirname + '/views/content/', req.user.username +"/"+ fileName);
+  const filePath = path.join(__dirname + '/views/content/', req.user.username + "/" + fileName);
 
   fs.unlink(filePath, (err) => {
     if (err) {
@@ -101,9 +109,17 @@ app.get('/style.css', (req, res) => {
   res.sendFile(__dirname + '/views/style.css')
 });
 
-app.get('/*', checkAuthenticated, (req, res) => {
-  console.log(req.query)
-  res.send(`<?xml version='1.0' encoding='UTF-8'?><Error><Code>404</Code><Message>Not Found</Message><Details>The requested asset was not found inside the ${req.user.username} Cloud Storage bucket.</Details></Error>`)
+app.get('/404', (req, res) => {
+  username = ""
+  filenow = req.query
+  res.render('404.ejs', { filename: filenow, username: username })
+  // res.send(`<?xml version='1.0' encoding='UTF-8'?><Error><Code>404</Code><Message>Not Found</Message><Details>The requested asset was not found inside the ${req.user.username} Cloud Storage bucket.</Details></Error>`)
+});
+
+app.get('/*', auth404, (req, res) => {
+  username = req.user.username
+  filenow = req.query
+  res.render('404.ejs', { filename: filenow, username: username })
 });
 //--------------------------------------POST--------------------------------------//
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
@@ -150,7 +166,7 @@ app.post('/', checkAuthenticated, (req, res) => {
       });
 
     // Move the file into the folder
-    file.mv(`./views/content/${folder}/` + contentname, function(err) {
+    file.mv(`./views/content/${folder}/` + contentname, function (err) {
       if (err) { res.send(err) }
       else {
         // push username and filename to the filename list
@@ -166,7 +182,7 @@ app.post('/', checkAuthenticated, (req, res) => {
 });
 //-----------------------------DELETE Route for Logout----------------------------//
 app.delete('/logout', (req, res, next) => {
-  req.logOut(function(err) { return next(err); })
+  req.logOut(function (err) { return next(err); })
   res.redirect('/login')
 })
 //--------------------------------User Not Signed In------------------------------//
@@ -179,11 +195,16 @@ function checkNotAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return res.redirect('/') }
   next()
 }
+//--------------------------------User Not Signed In------------------------------//
+function auth404(req, res, next) {
+  if (req.isAuthenticated()) { return next() }
+  res.redirect('/404')
+}
 //-------------------------------Server Startup Config----------------------------//
-var server = app.listen(5002, function() {
+var server = app.listen(5002, function () {
   var port = server.address().port
   var family = server.address().family
   var address = server.address().address
   if (address == "::") { address = "this ratio mf" }
-  console.log("Server running on Port: http://localhost:"+ port, "| Family:", family, "| Address", address)
+  console.log("Server running on Port: http://localhost:" + port, "| Family:", family, "| Address", address)
 });

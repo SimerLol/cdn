@@ -6,7 +6,7 @@
   <link href="/style.css" rel="stylesheet" type="text/css" />
   <meta name="viewport" content="width=device-width, initial-scale=0.7, viewport-fit=cover">
   <link rel="icon" href="https://cdn.simer.ml/content/Simer/joy_pfp.png">
-  </head>
+</head>
 
 <body>
   <!-- <script type='text/javascript' src='//pl17409914.profitablecpmgate.com/1a/0a/c0/1a0ac0d2773408582609aa368c11e66b.js'></script> -->
@@ -32,39 +32,50 @@
     </h3>
   </div>
 
+  <img src="" hidden class="view" />
+
   <div class="table_responsive">
     <table>
       <thead>
         <tr>
           <th>#</th>
           <th>Render</th>
-          <th>Filename</th>
-          <th>Last Modified</th>
+          <th>Filename / Relative Location</th>
+          <th>Size</th>
           <th>Filetype</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <% for (const file of indexedFiles) { %>
-        <tr>
-          <td><%= file.index %></td>
-          <td id="<%= file.index %>" onclick="location.href='<%= file.src %>'"><img src="<%= file.src %>""
-            alt="403" width="200"></td>
-          <td onclick="location.href='<%= file.src %>'"><%= file.name %></td>
-          <td><%= parseFloat(file.size).toFixed(2) %> MB</td>
-          <td><%= file.type %></td>
-          <td>
-            <span class="action_btn">
-              <a onclick="Copy('<%= file.src %>')">Copy</a>
-              <a href="/remove?id=<%= file.name %>">Remove</a>
-            </span>
-          </td>
-        </tr>
-        <% } %>
+          <tr>
+            <td>
+              <%= file.index %>
+            </td>
+            <td id="<%= file.index %>" onclick="window.open('<%= file.src %>' + location.search)" class="point"><img
+                src="<%= file.src %>""
+            alt=" 403" width="200"></td>
+            <td onclick="window.open('<%= file.src %>' + location.search)" class="point">
+              <%= file.name %>
+            </td>
+            <td>
+              <%= parseFloat(file.size).toFixed(2) %> MB
+            </td>
+            <td>
+              <%= file.type %>
+            </td>
+            <td>
+              <span class="action_btn">
+                <a onclick="Copy('<%= file.src %>')">Copy</a>
+                <a href="/remove?id=<%= file.name %>">Remove</a>
+              </span>
+            </td>
+          </tr>
+          <% } %>
       </tbody>
     </table>
   </div>
-</div>
+  </div>
 </body>
 
 </html>

@@ -25,3 +25,8 @@ A simple and personal CDN with user registrations, authentications, upload limit
 + UI filtering
 + Filetype filter for a click-to-enlarge player
 + Id Index duplication needs to go
++ Upload handling needs an update
++ Add SimerDocs integration for file storage
++ Add API Keys and Tokens
++ Replace pricing plans with Pay as Go (og discount)
++ [QoL] Add GSAP shortcuts
