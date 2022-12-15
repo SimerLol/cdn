@@ -22,3 +22,6 @@ A simple and personal CDN with user registrations, authentications, upload limit
 + User defined path uploads
 + Multiple file uploads
 + Multiple regions and clusterization
++ UI filtering
++ Filetype filter for a click-to-enlarge player
++ Id Index duplication needs to go

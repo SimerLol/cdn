@@ -145,10 +145,10 @@ function checkNotAuthenticated(req, res, next) {
   next()
 }
 //-------------------------------Server Startup Config----------------------------//
-var server = app.listen(8080, function() {
+var server = app.listen(5002, function() {
   var port = server.address().port
   var family = server.address().family
   var address = server.address().address
   if (address == "::") { address = "this ratio mf" }
-  console.log("Server running on Port:", port, "| Family:", family, "| Address", address)
+  console.log("Server running on Port: http://localhost:"+ port, "| Family:", family, "| Address", address)
 });
