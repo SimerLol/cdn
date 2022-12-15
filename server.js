@@ -37,7 +37,27 @@ app.use(upload());
 
 //--------------------------------------GETS--------------------------------------//
 app.get('/', checkAuthenticated, (req, res) => {
-  res.render('index.ejs', { name: req.user.username })
+  res.render('index.ejs', { name: req.user.username})
+})
+
+app.get('/bucket', checkAuthenticated, (req, res) => {
+  const directoryPath = path.join(__dirname + '/views/content/', req.user.username);
+  const filenames = fs.readdirSync(directoryPath);
+
+  const files = filenames.filter((filename) => {
+    // Use fs.lstatSync() to check if the given path is a file.
+    return fs.lstatSync(`${directoryPath}/${filename}`).isFile();
+  });
+
+  const indexedFiles = files.map((file, index) => ({
+    name: file,
+    index: index + 1,
+    type: file.split(".")[1],
+    size: fs.statSync(directoryPath+"/"+file).size/(1024*1024),
+    src: "https://cdn.simer.ml/content/"+ req.user.username + "/" + file
+  }));
+
+  res.render('bucket.ejs', { name: req.user.username, indexedFiles })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -47,6 +67,21 @@ app.get('/login', checkNotAuthenticated, (req, res) => {
 app.get('/register', checkNotAuthenticated, (req, res) => {
   res.render('register.ejs')
 })
+
+app.get('/remove', checkAuthenticated, (req, res) => {
+  const fileName = req.query.id;
+  const filePath = path.join(__dirname + '/views/content/', req.user.username +"/"+ fileName);
+
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      // handle the error
+      res.send(err);
+    } else {
+      // file has been successfully deleted
+      res.render('confirm-del.ejs', { filename: fileName })
+    }
+  });
+});
 
 app.get('/confirm', checkAuthenticated, (req, res) => {
   // find array based on username
